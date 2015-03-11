@@ -2,49 +2,75 @@ import java.util.Comparator;
 
 public class Solver {
 
-    private MinPQ<Node> queue;
+    private final boolean isSolvable;
+
+    private MinPQ<Node> mainQueue;
+
+    private MinPQ<Node> twinQueue;
 
     private Stack<Board> solution;
+
+    private int moves;
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
 
-        solution = new Stack<>();
+        mainQueue = new MinPQ<>(new NodeComparator());
 
-        queue = new MinPQ<>(new NodeComparator());
+        twinQueue = new MinPQ<>(new NodeComparator());
 
-        queue.insert(new Node(initial, 0, null));
+        mainQueue.insert(new Node(initial, 0, null));
 
-        Node node = queue.min();
+        twinQueue.insert(new Node(initial.twin(), 0, null));
 
-        while (!node.board.isGoal()) {
+        Node node = mainQueue.min();
 
-            node = queue.delMin();
+        Node twin = twinQueue.min();
+
+        while (!node.board.isGoal() && !twin.board.isGoal()) {
+
+            node = mainQueue.delMin();
 
             for (Board b : node.board.neighbors()) {
                 if (node.previous == null || !b.equals(node.previous.board))
-                    queue.insert(new Node(b, node.moves + 1, node));
+                    mainQueue.insert(new Node(b, node.moves + 1, node));
+            }
+
+            twin = twinQueue.delMin();
+
+            for (Board b : twin.board.neighbors()) {
+                if (twin.previous == null || !b.equals(twin.previous.board))
+                    twinQueue.insert(new Node(b, twin.moves + 1, twin));
             }
         }
 
-        solution.push(node.board);
+        isSolvable = node.board.isGoal();
 
-        while (node.previous != null) {
-            solution.push(node.previous.board);
-            node = node.previous;
+        moves = node.moves;
+
+        if (isSolvable) {
+
+            solution = new Stack<>();
+
+            solution.push(node.board);
+
+            while (node.previous != null) {
+                solution.push(node.previous.board);
+                node = node.previous;
+            }
         }
 
     }
 
     // is the initial board solvable?
     public boolean isSolvable() {
-        return true;
+        return isSolvable;
     }
 
     // min number of moves to solve initial board; -1 if unsolvable
     public int moves() {
         if (isSolvable())
-            return solution.size();
+            return moves;
         else
             return -1;
     }
@@ -110,6 +136,8 @@ public class Solver {
         System.out.println("hamming: " + initial.hamming());
         System.out.println("manhattan: " + initial.manhattan());
         System.out.println("dimension: " + initial.dimension());
+        System.out.println(initial);
+        System.out.println(initial.twin());
 
         // solve the puzzle
         Solver solver = new Solver(initial);
