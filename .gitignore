@@ -1,3 +1,7 @@
+# Compressed Files
+*.zip
+*.tar.gz
+
 # Java class files
 *.class
 

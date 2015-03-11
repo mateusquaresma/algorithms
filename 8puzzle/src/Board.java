@@ -1,3 +1,5 @@
+import java.util.*;
+
 public class Board {
 
     private int[][] blocks;
@@ -61,6 +63,16 @@ public class Board {
 
     }
 
+    private Board(int[][] blocks, int x0, int y0, int x1, int y1){
+        // construct a board
+        this(blocks);
+
+        // exchange (x0,y0) with (x1,y1)
+        int temp = this.blocks[x0][y0];
+        this.blocks[x0][y0] = this.blocks[x1][y1];
+        this.blocks[x1][y1] = temp;
+    }
+
     private int manhattan(int i, int j, int value) {
         for (int m = 0; m < dimension; m++)
             for (int n = 0; n < dimension; n++)
@@ -73,11 +85,13 @@ public class Board {
     // (where blocks[i][j] = block in row i, column j)
     // board dimension N
     public int dimension() {
+        
         return dimension;
     }
 
     // number of blocks out of place
     public int hamming() {
+        
         return blocksOutOfPlace;
     }
 
@@ -123,32 +137,34 @@ public class Board {
     // all neighboring boards
     public Iterable<Board> neighbors() {
 
-        for (int i = 0; i < dimension; i++){
+        Queue<Board> queue = new Queue<>();
+
+        for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < dimension; j++) {
                 if (blocks[i][j] == 0) {
 
-                    //posso mover para a esquerda
-                    if (j > 0){
-                        // novo construtor, recebe os blocks e os indices para serem trocados;
-                    }
-
+                    // posso mover para a esquerda
+                    if (j > 0)
+                        queue.enqueue(new Board(blocks, i, j, i, j - 1));
 
                     // posso mover para a direita
                     if (j < dimension - 1)
-                        ;
+                        queue.enqueue(new Board(blocks, i, j, i, j + 1));
 
-                    //posso mover para cima
+                    // posso mover para cima
                     if (i > 0)
-                        ;
+                        queue.enqueue(new Board(blocks, i, j, i - 1, j));
 
                     // posso mover para baixo
-                    if(i < dimension - 1)
-                        ;
+                    if (i < dimension - 1)
+                        queue.enqueue(new Board(blocks, i, j, i + 1, j));
+
+                    return queue;
                 }
             }
         }
 
-        return null;
+        return queue;
     }
 
     // string representation of this board (in the output format specified

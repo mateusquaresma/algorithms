@@ -4,29 +4,55 @@ public class Solver {
 
     private MinPQ<Node> queue;
 
+    private Stack<Board> solution;
+
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
+
+        solution = new Stack<>();
 
         queue = new MinPQ<>(new NodeComparator());
 
         queue.insert(new Node(initial, 0, null));
 
+        Node node = queue.min();
+
+        while (!node.board.isGoal()) {
+
+            node = queue.delMin();
+
+            for (Board b : node.board.neighbors()) {
+                if (node.previous == null || !b.equals(node.previous.board))
+                    queue.insert(new Node(b, node.moves + 1, node));
+            }
+        }
+
+        solution.push(node.board);
+
+        while (node.previous != null) {
+            solution.push(node.previous.board);
+            node = node.previous;
+        }
+
     }
 
     // is the initial board solvable?
     public boolean isSolvable() {
-        return false;
+        return true;
     }
 
     // min number of moves to solve initial board; -1 if unsolvable
     public int moves() {
-        return 0;
+        if (isSolvable())
+            return solution.size();
+        else
+            return -1;
     }
 
     // sequence of boards in a shortest solution; null if unsolvable
     public Iterable<Board> solution() {
 
-        return null;
+        return solution;
     }
 
     private class Node {
@@ -34,7 +60,7 @@ public class Solver {
         private final int moves;
         private final Node previous;
 
-        Node(Board board, int moves, Node previous){
+        Node(Board board, int moves, Node previous) {
             this.board = board;
             this.moves = moves;
             this.previous = previous;
@@ -58,7 +84,7 @@ public class Solver {
 
                 int secondManhattam = second.moves + second.board.manhattan();
 
-                if(firstManhattam > secondManhattam)
+                if (firstManhattam > secondManhattam)
                     return 1;
                 else if (firstManhattam < secondManhattam)
                     return -1;
