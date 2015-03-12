@@ -2,6 +2,8 @@ public class Board {
 
     private static final String TO_STRING_FORMAT = "%2d ";
 
+    private static final String NEW_LINE = "\n";
+
     private short[][] blocks;
 
     private short blocksOutOfPlace;
@@ -10,16 +12,41 @@ public class Board {
 
     private short[][] goalBlocks;
 
+    private short[] goalInline;
+
     private short manhattanDistance = -1;
 
-    private short _x0 = -1;
+    private short x0 = -1;
 
-    private short _y0 = -1;
+    private short y0 = -1;
 
     // construct a board from an N-by-N array of blocks
     public Board(int[][] blocks) {
 
         build(blocks, new short[blocks.length][blocks.length], false);
+    }
+
+    private Board(short[][] blocks, short[][] goalBlocks, int x0, int y0, int
+            x1, int y1) {
+        // construct a board
+        build(blocks, goalBlocks);
+
+        // exchange (x0,y0) with (x1,y1)
+        short temp = this.blocks[x0][y0];
+        this.blocks[x0][y0] = this.blocks[x1][y1];
+        this.blocks[x1][y1] = temp;
+
+        this.x0 = (short) x1;
+        this.y0 = (short) y1;
+    }
+
+    private Board(int x0, int y0, int x1, int y1, short[][] blocks, short[][]
+            goalBlocks) {
+        // construct a board
+        build(blocks, goalBlocks);
+        short temp = this.blocks[x0][y0];
+        this.blocks[x0][y0] = this.blocks[x1][y1];
+        this.blocks[x1][y1] = temp;
     }
 
     private void build(int[][] blocks, short[][] goalBlocks, boolean
@@ -30,6 +57,7 @@ public class Board {
         blocksOutOfPlace = 0;
         this.goalBlocks = goalBlocks;
         this.blocks = new short[dimension][dimension];
+        this.goalInline = new short[dimension * dimension];
 
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < dimension; j++) {
@@ -42,8 +70,8 @@ public class Board {
                 }
 
                 if (blocks[i][j] == 0) {
-                    _x0 = (short) i;
-                    _y0 = (short) j;
+                    x0 = (short) i;
+                    y0 = (short) j;
                 }
 
                 this.blocks[i][j] = (short) blocks[i][j];
@@ -54,39 +82,37 @@ public class Board {
                   * caso ele esteja em outra posição. Funciona
                  * mas não está de acordo com o enunciado do problema.
                  */
-                if (blocks[i][j] != 0 && blocks[i][j] != k + 1)
+                if (blocks[i][j] != 0 && blocks[i][j] != ++k)
                     blocksOutOfPlace++;
-
-                k++;
             }
         }
     }
 
-    private void build(short[][] blocks, short[][] goalBlocks, boolean
-            goalProvided) {
+    private void build(short[][] blocks, short[][] goalBlocks) {
         this.dimension = (short) blocks.length;
 
         int k = 0;
         blocksOutOfPlace = 0;
         this.goalBlocks = goalBlocks;
         this.blocks = new short[dimension][dimension];
-
+        this.goalInline = new short[dimension * dimension];
+        this.blocks = blocks;
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < dimension; j++) {
 
-                if (!goalProvided) {
+                /*if (!goalProvided) {
                     if (i == j && i == dimension - 1)
                         this.goalBlocks[i][j] = 0;
                     else
                         this.goalBlocks[i][j] = (short) goal(i, j);
-                }
+                }*/
 
                 if (blocks[i][j] == 0) {
-                    _x0 = (short) i;
-                    _y0 = (short) j;
+                    x0 = (short) i;
+                    y0 = (short) j;
                 }
 
-                this.blocks[i][j] = blocks[i][j];
+                //this.blocks[i][j] = blocks[i][j];
                 /*
                  * A iteração vai até o penúltimo elemento, pois o último tem
                   * que ser zero. Dessa forma assume-se o 0 na
@@ -94,35 +120,10 @@ public class Board {
                   * caso ele esteja em outra posição. Funciona
                  * mas não está de acordo com o enunciado do problema.
                  */
-                if (blocks[i][j] != 0 && blocks[i][j] != k + 1)
+                if (blocks[i][j] != 0 && blocks[i][j] != ++k)
                     blocksOutOfPlace++;
-
-                k++;
             }
         }
-    }
-
-    private Board(short[][] blocks, short[][] goalBlocks, int x0, int y0, int
-            x1, int y1) {
-        // construct a board
-        build(blocks, goalBlocks, true);
-
-        // exchange (x0,y0) with (x1,y1)
-        short temp = this.blocks[x0][y0];
-        this.blocks[x0][y0] = this.blocks[x1][y1];
-        this.blocks[x1][y1] = temp;
-
-        _x0 = (short) x1;
-        _y0 = (short) y1;
-    }
-
-    private Board(int x0, int y0, int x1, int y1, short[][] blocks, short[][]
-            goalBlocks) {
-        // construct a board
-        build(blocks, goalBlocks, true);
-        short temp = this.blocks[x0][y0];
-        this.blocks[x0][y0] = this.blocks[x1][y1];
-        this.blocks[x1][y1] = temp;
     }
 
     private short manhattan(int i, int j, short value) {
@@ -204,8 +205,8 @@ public class Board {
 
         Queue<Board> boards = new Queue<>();
 
-        int i = _x0;
-        int j = _y0;
+        int i = this.x0;
+        int j = this.y0;
 
         // posso mover para a esquerda
         if (j > 0)
@@ -230,12 +231,12 @@ public class Board {
     // below)
     public String toString() {
         StringBuilder s = new StringBuilder();
-        s.append(dimension + "\n");
+        s.append(dimension + NEW_LINE);
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < dimension; j++) {
                 s.append(String.format(TO_STRING_FORMAT, blocks[i][j]));
             }
-            s.append("\n");
+            s.append(NEW_LINE);
         }
         return s.toString();
     }
