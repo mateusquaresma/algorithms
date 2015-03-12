@@ -4,15 +4,13 @@ public class Board {
 
     private static final String NEW_LINE = "\n";
 
-    private short[][] blocks;
-
-    private short blocksOutOfPlace;
+    private short hammingCount = -1;
 
     private short dimension;
 
-    private short[][] goalBlocks;
-
     private short[] goalInline;
+
+    private short[] inline;
 
     private short manhattanDistance = -1;
 
@@ -22,114 +20,52 @@ public class Board {
 
     // construct a board from an N-by-N array of blocks
     public Board(int[][] blocks) {
+        this.dimension = (short) blocks.length;
 
-        build(blocks, new short[blocks.length][blocks.length], false);
+        inline = new short[dimension * dimension];
+        goalInline = new short[dimension * dimension];
+
+        for (int i = 0; i < dimension; i++) {
+            for (int j = 0; j < dimension; j++) {
+
+                if (i == j && i == dimension - 1)
+                    goalInline[map(i, j)] = 0;
+                else
+                    goalInline[map(i, j)] = (short) goal(i, j);
+
+                if (blocks[i][j] == 0) {
+                    x0 = (short) i;
+                    y0 = (short) j;
+                }
+
+                inline[map(i, j)] = (short) blocks[i][j];
+            }
+        }
     }
 
-    private Board(short[][] blocks, short[][] goalBlocks, int x0, int y0, int
+    private Board(short[] blocks, short[] goalBlocks, int x0, int y0, int
             x1, int y1) {
-        // construct a board
-        build(blocks, goalBlocks);
 
-        // exchange (x0,y0) with (x1,y1)
-        short temp = this.blocks[x0][y0];
-        this.blocks[x0][y0] = this.blocks[x1][y1];
-        this.blocks[x1][y1] = temp;
+        dimension = (short) Math.sqrt(goalBlocks.length);
+        inline = new short[dimension * dimension];
 
-        this.x0 = (short) x1;
-        this.y0 = (short) y1;
-    }
-
-    private Board(int x0, int y0, int x1, int y1, short[][] blocks, short[][]
-            goalBlocks) {
-        // construct a board
-        build(blocks, goalBlocks);
-        short temp = this.blocks[x0][y0];
-        this.blocks[x0][y0] = this.blocks[x1][y1];
-        this.blocks[x1][y1] = temp;
-    }
-
-    private void build(int[][] blocks, short[][] goalBlocks, boolean
-            goalProvided) {
-        this.dimension = (short) blocks.length;
-
-        int k = 0;
-        blocksOutOfPlace = 0;
-        this.goalBlocks = goalBlocks;
-        this.blocks = new short[dimension][dimension];
-        this.goalInline = new short[dimension * dimension];
+        goalInline = goalBlocks;
 
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < dimension; j++) {
-
-                if (!goalProvided) {
-                    if (i == j && i == dimension - 1)
-                        this.goalBlocks[i][j] = 0;
-                    else
-                        this.goalBlocks[i][j] = (short) goal(i, j);
-                }
-
-                if (blocks[i][j] == 0) {
-                    x0 = (short) i;
-                    y0 = (short) j;
-                }
-
-                this.blocks[i][j] = (short) blocks[i][j];
-                /*
-                 * A iteração vai até o penúltimo elemento, pois o último tem
-                  * que ser zero. Dessa forma assume-se o 0 na
-                 * última posição como correto e considera o zero como errado
-                  * caso ele esteja em outra posição. Funciona
-                 * mas não está de acordo com o enunciado do problema.
-                 */
-                if (blocks[i][j] != 0 && blocks[i][j] != ++k)
-                    blocksOutOfPlace++;
+                inline[map(i, j)] = blocks[map(i, j)];
             }
         }
-    }
 
-    private void build(short[][] blocks, short[][] goalBlocks) {
-        this.dimension = (short) blocks.length;
-
-        int k = 0;
-        blocksOutOfPlace = 0;
-        this.goalBlocks = goalBlocks;
-        this.blocks = new short[dimension][dimension];
-        this.goalInline = new short[dimension * dimension];
-        this.blocks = blocks;
-        for (int i = 0; i < dimension; i++) {
-            for (int j = 0; j < dimension; j++) {
-
-                /*if (!goalProvided) {
-                    if (i == j && i == dimension - 1)
-                        this.goalBlocks[i][j] = 0;
-                    else
-                        this.goalBlocks[i][j] = (short) goal(i, j);
-                }*/
-
-                if (blocks[i][j] == 0) {
-                    x0 = (short) i;
-                    y0 = (short) j;
-                }
-
-                //this.blocks[i][j] = blocks[i][j];
-                /*
-                 * A iteração vai até o penúltimo elemento, pois o último tem
-                  * que ser zero. Dessa forma assume-se o 0 na
-                 * última posição como correto e considera o zero como errado
-                  * caso ele esteja em outra posição. Funciona
-                 * mas não está de acordo com o enunciado do problema.
-                 */
-                if (blocks[i][j] != 0 && blocks[i][j] != ++k)
-                    blocksOutOfPlace++;
-            }
-        }
+        short temp = inline[map(x0, y0)];
+        inline[map(x0, y0)] = inline[map(x1, y1)];
+        inline[map(x1, y1)] = temp;
     }
 
     private short manhattan(int i, int j, short value) {
         for (int m = 0; m < dimension; m++)
             for (int n = 0; n < dimension; n++)
-                if (goalBlocks[m][n] == value)
+                if (goalInline[map(m, n)] == value)
                     return (short) (Math.abs(m - i) + Math.abs(n - j));
 
         throw new RuntimeException();
@@ -145,7 +81,16 @@ public class Board {
     // number of blocks out of place
     public int hamming() {
 
-        return blocksOutOfPlace;
+        if (hammingCount < 0) {
+            hammingCount = 0;
+            for (int m = 0; m < dimension; m++)
+                for (int n = 0; n < dimension; n++)
+                    if (inline[map(m, n)] != 0
+                            && inline[map(m, n)] != goalInline[map(m, n)])
+                        hammingCount++;
+        }
+
+        return hammingCount;
     }
 
     // sum of Manhattan distances between blocks and goal
@@ -154,8 +99,8 @@ public class Board {
             manhattanDistance = 0;
             for (int i = 0; i < dimension; i++)
                 for (int j = 0; j < dimension; j++)
-                    if (blocks[i][j] != 0)
-                        manhattanDistance += manhattan(i, j, blocks[i][j]);
+                    if (inline[map(i, j)] != 0)
+                        manhattanDistance += manhattan(i, j, inline[map(i, j)]);
         }
         return manhattanDistance;
     }
@@ -163,16 +108,21 @@ public class Board {
     // is this board the goal board?
     public boolean isGoal() {
 
-        return this.equals(blocks, goalBlocks);
+        return this.equals(inline, goalInline);
     }
 
     // a board that is obtained by exchanging two adjacent blocks in the same
     // row
     public Board twin() {
-        if (blocks[0][0] != 0 && blocks[0][1] != 0)
-            return new Board(0, 0, 0, 1, blocks, goalBlocks);
+        Board twin;
+        if (inline[map(0, 0)] != 0 && inline[map(0, 1)] != 0)
+            twin = new Board(inline, goalInline, 0, 0, 0, 1);
         else
-            return new Board(1, 0, 1, 1, blocks, goalBlocks);
+            twin = new Board(inline, goalInline, 1, 0, 1, 1);
+
+        twin.x0 = this.x0;
+        twin.y0 = this.y0;
+        return twin;
     }
 
     // does this board equal y?
@@ -188,13 +138,13 @@ public class Board {
         if (this.dimension != other.dimension)
             return false;
 
-        return equals(this.blocks, other.blocks);
+        return equals(this.inline, other.inline);
     }
 
-    private boolean equals(short[][] thisBlocks, short[][] otherBlocks) {
+    private boolean equals(short[] thisBlocks, short[] otherBlocks) {
         for (int i = 0; i < dimension; i++)
             for (int j = 0; j < dimension; j++)
-                if (thisBlocks[i][j] != otherBlocks[i][j])
+                if (thisBlocks[map(i, j)] != otherBlocks[map(i, j)])
                     return false;
 
         return true;
@@ -209,21 +159,36 @@ public class Board {
         int j = this.y0;
 
         // posso mover para a esquerda
-        if (j > 0)
-            boards.enqueue(new Board(blocks, goalBlocks, i, j, i, j - 1));
+        if (j > 0) {
+            Board neighbor = new Board(inline, goalInline, i, j, i, j - 1);
+            neighbor.x0 = (short) i;
+            neighbor.y0 = (short) (j - 1);
+            boards.enqueue(neighbor);
+        }
 
         // posso mover para a direita
-        if (j < dimension - 1)
-            boards.enqueue(new Board(blocks, goalBlocks, i, j, i, j + 1));
+        if (j < dimension - 1) {
+            Board neighbor = new Board(inline, goalInline, i, j, i, j + 1);
+            neighbor.x0 = (short) i;
+            neighbor.y0 = (short) (j + 1);
+            boards.enqueue(neighbor);
+        }
 
         // posso mover para cima
-        if (i > 0)
-            boards.enqueue(new Board(blocks, goalBlocks, i, j, i - 1, j));
+        if (i > 0) {
+            Board neighbor = new Board(inline, goalInline, i, j, i - 1, j);
+            neighbor.x0 = (short) (i - 1);
+            neighbor.y0 = (short) j;
+            boards.enqueue(neighbor);
+        }
 
         // posso mover para baixo
-        if (i < dimension - 1)
-            boards.enqueue(new Board(blocks, goalBlocks, i, j, i + 1, j));
-
+        if (i < dimension - 1) {
+            Board neighbor = new Board(inline, goalInline, i, j, i + 1, j);
+            neighbor.x0 = (short) (i + 1);
+            neighbor.y0 = (short) j;
+            boards.enqueue(neighbor);
+        }
         return boards;
     }
 
@@ -234,7 +199,7 @@ public class Board {
         s.append(dimension + NEW_LINE);
         for (int i = 0; i < dimension; i++) {
             for (int j = 0; j < dimension; j++) {
-                s.append(String.format(TO_STRING_FORMAT, blocks[i][j]));
+                s.append(String.format(TO_STRING_FORMAT, inline[map(i, j)]));
             }
             s.append(NEW_LINE);
         }
@@ -250,6 +215,21 @@ public class Board {
             return 0;
 
         return i * dimension + j + 1;
+    }
+
+    /**
+     * Maps the row (i) and the column (j) to a unique id
+     *
+     * @param i - row
+     * @param j - column
+     * @return the id mapped by i and j
+     */
+    private int map(int i, int j) {
+        if (i == 0)
+            return j;
+        if (i == 1)
+            return dimension + j;
+        return i * dimension + j;
     }
 
     // unit tests (not graded)

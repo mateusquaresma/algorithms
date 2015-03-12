@@ -97,26 +97,6 @@ public class Solver {
 
         @Override
         public int compare(Node first, Node second) {
-            /*int firstHamming = first.moves + first.board.hamming();
-
-            int secondHamming = second.moves + second.board.hamming();
-
-            if (firstHamming > secondHamming)
-                return 1;
-            else if (firstHamming < secondHamming)
-                return -1;
-            else {
-                int firstManhattam = first.moves + first.board.manhattan();
-
-                int secondManhattam = second.moves + second.board.manhattan();
-
-                if (firstManhattam > secondManhattam)
-                    return 1;
-                else if (firstManhattam < secondManhattam)
-                    return -1;
-                else
-                    return 0;
-            }*/
 
             int firstManhattam = first.moves + first.board.manhattan();
 
