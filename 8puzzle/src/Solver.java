@@ -97,7 +97,7 @@ public class Solver {
 
         @Override
         public int compare(Node first, Node second) {
-            int firstHamming = first.moves + first.board.hamming();
+            /*int firstHamming = first.moves + first.board.hamming();
 
             int secondHamming = second.moves + second.board.hamming();
 
@@ -116,12 +116,24 @@ public class Solver {
                     return -1;
                 else
                     return 0;
-            }
+            }*/
+
+            int firstManhattam = first.moves + first.board.manhattan();
+
+            int secondManhattam = second.moves + second.board.manhattan();
+
+            if (firstManhattam > secondManhattam)
+                return 1;
+            else if (firstManhattam < secondManhattam)
+                return -1;
+            else
+                return 0;
         }
     }
 
     // solve a slider puzzle (given below)
     public static void main(String[] args) {
+        //Stopwatch sw = new Stopwatch();
 
         // create initial board from file
         In in = new In(args[0]);
@@ -133,11 +145,11 @@ public class Solver {
 
         Board initial = new Board(blocks);
 
-        System.out.println("hamming: " + initial.hamming());
+        /*System.out.println("hamming: " + initial.hamming());
         System.out.println("manhattan: " + initial.manhattan());
         System.out.println("dimension: " + initial.dimension());
         System.out.println(initial);
-        System.out.println(initial.twin());
+        System.out.println(initial.twin());*/
 
         // solve the puzzle
         Solver solver = new Solver(initial);
@@ -150,5 +162,8 @@ public class Solver {
             for (Board board : solver.solution())
                 StdOut.println(board);
         }
+
+        //System.out.println(String.format("time elapsed = %ss", sw
+        // .elapsedTime()));
     }
 }
