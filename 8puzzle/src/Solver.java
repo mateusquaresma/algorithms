@@ -10,7 +10,7 @@ public class Solver {
 
     private Stack<Board> solution;
 
-    private int moves;
+    private short moves;
 
     // find a solution to the initial board (using the A* algorithm)
     public Solver(Board initial) {
@@ -46,7 +46,7 @@ public class Solver {
 
         isSolvable = node.board.isGoal();
 
-        moves = node.moves;
+        moves = (short) node.moves;
 
         if (isSolvable) {
 

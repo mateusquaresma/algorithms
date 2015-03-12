@@ -1,9 +1,4 @@
-import java.util.ArrayList;
-import java.util.List;
-
 public class Board {
-
-    private static final String VALUE_NOT_FOUND_MSG = "value %s not found!";
 
     private static final String TO_STRING_FORMAT = "%2d ";
 
@@ -17,7 +12,9 @@ public class Board {
 
     private short manhattanDistance = -1;
 
-    private short[] ZERO = new short[2];
+    private short _x0 = -1;
+
+    private short _y0 = -1;
 
     // construct a board from an N-by-N array of blocks
     public Board(int[][] blocks) {
@@ -45,8 +42,8 @@ public class Board {
                 }
 
                 if (blocks[i][j] == 0) {
-                    ZERO[0] = (short) i;
-                    ZERO[1] = (short) j;
+                    _x0 = (short) i;
+                    _y0 = (short) j;
                 }
 
                 this.blocks[i][j] = (short) blocks[i][j];
@@ -85,8 +82,8 @@ public class Board {
                 }
 
                 if (blocks[i][j] == 0) {
-                    ZERO[0] = (short) i;
-                    ZERO[1] = (short) j;
+                    _x0 = (short) i;
+                    _y0 = (short) j;
                 }
 
                 this.blocks[i][j] = blocks[i][j];
@@ -115,8 +112,8 @@ public class Board {
         this.blocks[x0][y0] = this.blocks[x1][y1];
         this.blocks[x1][y1] = temp;
 
-        ZERO[0] = (short) x1;
-        ZERO[1] = (short) y1;
+        _x0 = (short) x1;
+        _y0 = (short) y1;
     }
 
     private Board(int x0, int y0, int x1, int y1, short[][] blocks, short[][]
@@ -134,7 +131,7 @@ public class Board {
                 if (goalBlocks[m][n] == value)
                     return (short) (Math.abs(m - i) + Math.abs(n - j));
 
-        throw new RuntimeException(String.format(VALUE_NOT_FOUND_MSG, value));
+        throw new RuntimeException();
     }
 
     // (where blocks[i][j] = block in row i, column j)
@@ -205,26 +202,26 @@ public class Board {
     // all neighboring boards
     public Iterable<Board> neighbors() {
 
-        List<Board> boards = new ArrayList<>();
+        Queue<Board> boards = new Queue<>();
 
-        int i = ZERO[0];
-        int j = ZERO[1];
+        int i = _x0;
+        int j = _y0;
 
         // posso mover para a esquerda
         if (j > 0)
-            boards.add(new Board(blocks, goalBlocks, i, j, i, j - 1));
+            boards.enqueue(new Board(blocks, goalBlocks, i, j, i, j - 1));
 
         // posso mover para a direita
         if (j < dimension - 1)
-            boards.add(new Board(blocks, goalBlocks, i, j, i, j + 1));
+            boards.enqueue(new Board(blocks, goalBlocks, i, j, i, j + 1));
 
         // posso mover para cima
         if (i > 0)
-            boards.add(new Board(blocks, goalBlocks, i, j, i - 1, j));
+            boards.enqueue(new Board(blocks, goalBlocks, i, j, i - 1, j));
 
         // posso mover para baixo
         if (i < dimension - 1)
-            boards.add(new Board(blocks, goalBlocks, i, j, i + 1, j));
+            boards.enqueue(new Board(blocks, goalBlocks, i, j, i + 1, j));
 
         return boards;
     }
