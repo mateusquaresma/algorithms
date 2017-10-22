@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/8puzzle/8puzzle.iml" filepath="$PROJECT_DIR$/8puzzle/8puzzle.iml" />
+      <module fileurl="file://$PROJECT_DIR$/collinear-points/collinear-points.iml" filepath="$PROJECT_DIR$/collinear-points/collinear-points.iml" />
+      <module fileurl="file://$PROJECT_DIR$/percolation/percolation.iml" filepath="$PROJECT_DIR$/percolation/percolation.iml" />
+      <module fileurl="file://$PROJECT_DIR$/queues-and-deques/queues-and-deques.iml" filepath="$PROJECT_DIR$/queues-and-deques/queues-and-deques.iml" />
+      <module fileurl="file://$PROJECT_DIR$/seam-carving/seam-carving.iml" filepath="$PROJECT_DIR$/seam-carving/seam-carving.iml" />
+      <module fileurl="file://$PROJECT_DIR$/wordnet/wordnet.iml" filepath="$PROJECT_DIR$/wordnet/wordnet.iml" />
+    </modules>
+  </component>
+</project>
